@@ -1,6 +1,6 @@
 FROM debian:jessie
 
-MAINTAINER Jupyter Project <jupyter@googlegroups.com>
+MAINTAINER Philipp Ross <philippross@gmail.com>
 
 # Install all OS dependencies for fully functional notebook server
 ENV DEBIAN_FRONTEND noninteractive
@@ -21,10 +21,14 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     texlive-fonts-recommended \
     supervisor \
     sudo \
+    libxrender1 \
+    fonts-dejavu \
+    gfortran \
+    gcc \
     && apt-get clean
 
 ENV CONDA_DIR /opt/conda
-ENV NB_USER jovyan
+ENV NB_USER phil
 
 # Install conda
 RUN echo 'export PATH=$CONDA_DIR/bin:$PATH' > /etc/profile.d/conda.sh && \
@@ -64,8 +68,21 @@ EXPOSE 8888
 USER root
 CMD ["supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]
 
+# Install Julia & IJulia
+RUN apt-get install -yq \
+    julia && \
+    julia -e 'Pkg.add("IJulia")'
+
 # Add local files as late as possible to avoid cache busting
 COPY ipython_notebook_config.py $HOME/.ipython/profile_default/
 COPY notebook.conf /etc/supervisor/conf.d/
 COPY enable_sudo.sh /usr/local/bin/
 RUN chown $NB_USER:$NB_USER $HOME/.ipython/profile_default/ipython_notebook_config.py
+
+# Install additional kernels and packages
+COPY install_python3_packages.sh /usr/local/bin/
+COPY install_python2_packages.sh /usr/local/bin/
+COPY install_r_packages.sh /usr/local/bin/
+RUN bash /usr/local/bin/install_python3_packages.sh
+RUN bash /usr/local/bin/install_python2_packages.sh
+RUN bash /usr/local/bin/install_r_packages.sh
