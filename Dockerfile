@@ -1,4 +1,4 @@
-FROM debian:jessie
+FROM debian:testing
 
 MAINTAINER Philipp Ross <philippross@gmail.com>
 
@@ -68,11 +68,6 @@ EXPOSE 8888
 USER root
 CMD ["supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]
 
-# Install Julia & IJulia
-RUN apt-get install -yq \
-    julia && \
-    julia -e 'Pkg.add("IJulia")'
-
 # Add local files as late as possible to avoid cache busting
 COPY ipython_notebook_config.py $HOME/.ipython/profile_default/
 COPY notebook.conf /etc/supervisor/conf.d/
@@ -80,9 +75,14 @@ COPY enable_sudo.sh /usr/local/bin/
 RUN chown $NB_USER:$NB_USER $HOME/.ipython/profile_default/ipython_notebook_config.py
 
 # Install additional kernels and packages
-COPY install_python3_packages.sh /usr/local/bin/
-COPY install_python2_packages.sh /usr/local/bin/
-COPY install_r_packages.sh /usr/local/bin/
-RUN bash /usr/local/bin/install_python3_packages.sh
-RUN bash /usr/local/bin/install_python2_packages.sh
-RUN bash /usr/local/bin/install_r_packages.sh
+COPY install_python2.sh /usr/local/bin/
+COPY install_python3.sh /usr/local/bin/
+COPY install_cran.sh /usr/local/bin/
+COPY install_bioc.sh /usr/local/bin/
+COPY install_julia.sh /usr/local/bin/
+
+RUN bash /usr/local/bin/install_python2.sh
+RUN bash /usr/local/bin/install_python3.sh
+RUN bash /usr/local/bin/install_cran.sh
+RUN bash /usr/local/bin/install_bioc.sh
+RUN bash /usr/local/bin/install_julia.sh
