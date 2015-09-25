@@ -130,10 +130,16 @@ install2.r --error \
     testthat \
     tidyr \
     shiny \
-    xml2
+    xml2 \
+    cowplot \
+    DT \
+    ggvis \
+    foreach \
+    gplots \
+    NeatMap \
+    glmnet
 ## Manually install (useful packages from) the SUGGESTS list of the above packages.
 ## (because --deps TRUE can fail when packages are added/removed from CRAN)
-Rscript -e 'source("http://bioconductor.org/biocLite.R"); biocLite("BiocInstaller")'
 install2.r --error \
     base64enc \
     Cairo \
@@ -143,7 +149,7 @@ install2.r --error \
     downloader \
     gridExtra \
     gtable \
-    hexbin \
+#    hexbin \
     Hmisc \
     htmlwidgets \
     jpeg \
